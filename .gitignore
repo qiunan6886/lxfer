@@ -1,0 +1,20 @@
+﻿# 构建产物
+*.exe
+*.pdb
+*.o
+target/
+# Flutter / Android
+mobile/.dart_tool/
+mobile/build/
+mobile/.gradle/
+mobile/**/build/
+mobile/android/local.properties
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+# 本地测试数据
+_test*/
+_*/
+# 编辑器
+.idea/
+.vscode/
+*.iml

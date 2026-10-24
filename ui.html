@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>lxfer 换机助手</title>
+<style>
+:root{
+  --bg:#f3f6fb; --card:#ffffff; --ink:#14213d; --sub:#6c7c99; --line:#e6ecf6;
+  --blue:#2f6bff; --blue-d:#1f56e0; --blue-l:#eaf1ff;
+  --green:#16a34a; --amber:#e8890c; --red:#e5484d;
+  --sh:0 10px 30px rgba(20,33,61,.07); --sh2:0 22px 50px rgba(47,107,255,.18);
+  --r:22px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);font-size:14px;
+  background:
+    radial-gradient(1100px 560px at 12% -12%, #e6efff 0%, rgba(230,239,255,0) 62%),
+    radial-gradient(900px 520px at 108% 4%, #f1ebff 0%, rgba(241,235,255,0) 58%),
+    var(--bg);
+  font-family:"Microsoft YaHei UI","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#d5dfef;border-radius:8px;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- 顶栏 ---------- */
+.top{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;
+  border-bottom:1px solid rgba(224,232,245,.85);background:rgba(255,255,255,.72);
+  backdrop-filter:blur(14px);position:relative;z-index:10}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(140deg,#5b95ff,#2f6bff);box-shadow:0 6px 16px rgba(47,107,255,.35)}
+.brand-name{font-size:16px;font-weight:700;letter-spacing:.3px;line-height:1.1}
+.brand-sub{font-size:11px;color:var(--sub);letter-spacing:.5px}
+.top-right{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--sub)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+
+main{height:calc(100% - 66px);overflow-y:auto;overflow-x:hidden;padding:26px 30px 34px;
+  display:flex;flex-direction:column}
+.page{width:100%;margin:auto 0}
+
+/* ---------- 通用卡片 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--sh)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:1.4px;color:#8a99b5;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.hint{font-size:12.5px;color:var(--sub);line-height:1.65;margin-top:14px}
+button{font-family:inherit}
+
+/* ---------- 首页 ---------- */
+.home{max-width:1000px;margin:0 auto;text-align:center;padding-top:14px}
+.home h1{font-size:33px;line-height:1.25;margin:0 0 12px;letter-spacing:-.3px}
+.home .sub{color:var(--sub);font-size:14.5px;margin:0}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:44px;text-align:left}
+.pick{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:26px;
+  padding:38px 34px 34px;cursor:pointer;box-shadow:var(--sh);transition:transform .22s cubic-bezier(.2,.8,.3,1),box-shadow .22s,border-color .22s;text-align:center}
+.pick:hover{transform:translateY(-5px);box-shadow:var(--sh2);border-color:#cfe0ff}
+.pick:active{transform:translateY(-2px) scale(.995)}
+.pick .glow{position:absolute;right:-70px;top:-90px;width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(47,107,255,.14),rgba(47,107,255,0) 65%);pointer-events:none}
+.art{width:104px;height:104px;border-radius:30px;display:grid;place-items:center;margin:0 auto 22px;
+  background:linear-gradient(145deg,#f0f6ff,#dfe9ff);box-shadow:inset 0 1px 0 #fff}
+.pick h2{font-size:21px;margin:0 0 8px;letter-spacing:-.2px}
+.pick p{color:var(--sub);margin:0;line-height:1.6;font-size:13.5px}
+.tag{position:absolute;top:24px;right:24px;font-size:11.5px;font-weight:600;color:#5b7ba8;
+  background:#f2f6fd;border:1px solid #e3ecfa;border-radius:999px;padding:5px 11px}
+.tag.blue{color:#2f6bff;background:#eef4ff;border-color:#dbe7ff}
+.feats{display:flex;justify-content:center;gap:26px;margin-top:34px;color:var(--sub);font-size:12.5px;flex-wrap:wrap}
+.feats span{display:flex;align-items:center;gap:7px}
+.feats i{width:5px;height:5px;border-radius:50%;background:#b9c8e2;display:inline-block}
+
+/* ---------- 接收 / 发送 布局 ---------- */
+.pair,.send{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.pair>div,.send>div{min-width:0}
+.thead{max-width:1000px;margin:0 auto 20px;display:flex;align-items:center;gap:14px}
+.back{width:34px;height:34px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--sub);
+  cursor:pointer;display:grid;place-items:center;font-size:17px;transition:.18s}
+.back:hover{color:var(--ink);border-color:#cdd9ea;box-shadow:0 4px 12px rgba(20,33,61,.06)}
+.thead h1{font-size:20px;margin:0}
+.thead p{margin:2px 0 0;font-size:12.5px;color:var(--sub)}
+
+.digits{display:flex;gap:10px;margin:6px 0 18px}
+.dg{flex:1;height:78px;border-radius:16px;display:grid;place-items:center;font-size:36px;font-weight:700;
+  color:#1b2b4d;background:linear-gradient(180deg,#f8fbff,#edf3fd);border:1px solid #dfe8f8;
+  box-shadow:inset 0 1px 0 #fff}
+.dg.sep{flex:0 0 10px;background:none;border:none;box-shadow:none;color:#c3d0e6;font-size:22px}
+.status{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#3d5a8a;font-weight:600}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:pulse 1.7s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,107,255,.55)}70%{box-shadow:0 0 0 11px rgba(47,107,255,0)}100%{box-shadow:0 0 0 0 rgba(47,107,255,0)}}
+
+.pathrow{display:flex;gap:10px}
+input[type=text]{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:13px;padding:0 15px;
+  font-size:14px;color:var(--ink);background:#fbfdff;outline:none;font-family:inherit;transition:.18s}
+input[type=text]:focus{border-color:#a9c6ff;box-shadow:0 0 0 4px rgba(47,107,255,.1);background:#fff}
+.btn-browse{height:46px;padding:0 18px;border-radius:13px;border:1px solid var(--line);background:#fff;
+  color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.btn-browse:hover{border-color:#cdd9ea;box-shadow:0 4px 12px rgba(20,33,61,.07)}
+.space{font-size:12.5px;color:var(--sub);margin-top:12px}
+.ticks{list-style:none;padding:0;margin:20px 0 0;font-size:12.8px;color:var(--sub);line-height:2}
+.ticks li::before{content:"✓";color:#22b573;font-weight:700;margin-right:8px}
+.tip{font-size:12.3px;color:#8294b0;line-height:1.7;margin-top:16px;text-align:center}
+.tip b{color:#3d5a8a}
+
+/* ---------- 发送端 ---------- */
+.devices{display:flex;flex-direction:column;gap:8px;min-height:64px}
+.dev{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;border:1px solid var(--line);
+  background:#fbfdff;cursor:pointer;transition:.16s;width:100%;text-align:left}
+.dev:hover{border-color:#b9d1ff;background:#f5f9ff}
+.dev.sel{border-color:var(--blue);background:#f2f7ff;box-shadow:0 0 0 3px rgba(47,107,255,.1)}
+.devic{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#eaf1ff,#dae6ff);display:grid;place-items:center;flex:0 0 34px}
+.dev b{display:block;font-size:13.5px;line-height:1.3}
+.dev small{color:var(--sub);font-size:11.5px}
+.dev .chev{margin-left:auto;color:#c1cee4;font-size:18px}
+.searching{display:flex;align-items:center;gap:12px;padding:8px 4px;color:var(--sub);font-size:13px}
+.radar{position:relative;width:30px;height:30px;flex:0 0 30px}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid #dbe6fa;border-top-color:var(--blue);
+  animation:spin .85s linear infinite;flex:0 0 18px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.radar i{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(47,107,255,.5);animation:radar 1.9s infinite}
+.radar i:nth-child(2){animation-delay:.65s}
+.radar i:nth-child(3){animation-delay:1.3s}
+@keyframes radar{0%{transform:scale(.35);opacity:.9}80%{opacity:0}100%{transform:scale(1.15);opacity:0}}
+.mini{margin-left:auto;background:none;border:none;color:var(--blue);font-size:12.5px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:8px}
+.mini:hover{background:#eef4ff}
+.or{display:flex;align-items:center;gap:10px;color:#a7b4cb;font-size:11.5px;margin:16px 0 12px}
+.or::before,.or::after{content:"";height:1px;background:var(--line);flex:1}
+.codeboxes{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+.cb{width:100%;min-width:0;height:56px;border-radius:13px;border:1px solid var(--line);background:#fbfdff;text-align:center;
+  font-size:24px;font-weight:700;color:var(--ink);outline:none;transition:.16s;font-family:inherit;
+  -moz-appearance:textfield}
+.cb:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(47,107,255,.1);background:#fff}
+.cb.filled{border-color:#c9dbff;background:#f6faff}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid #dfe8f8;background:#f7faff;color:#3d5a8a;border-radius:11px;padding:8px 13px;
+  font-size:12.5px;font-weight:600;cursor:pointer;transition:.16s}
+.chip:hover{border-color:#b9d1ff;background:#eef4ff;color:var(--blue-d)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(47,107,255,.28)}
+.srcrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed #eef2f9;font-size:13px}
+.srcrow:last-child{border-bottom:none}
+.srcrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srcrow .sz{color:var(--sub);font-size:12px;font-variant-numeric:tabular-nums}
+.srcrow .del{width:24px;height:24px;border-radius:8px;border:none;background:#f6f8fc;color:#9aa9c2;cursor:pointer;font-size:14px;line-height:1}
+.srcrow .del:hover{background:#ffecec;color:var(--red)}
+.empty{color:#a7b4cb;font-size:12.8px;padding:10px 0}
+.ghost{height:44px;padding:0 18px;border-radius:12px;border:1px dashed #cfdaeb;background:#fbfdff;
+  color:#5b7ba8;font-size:13px;font-weight:600;cursor:pointer;transition:.16s;width:100%;margin-top:14px}
+.ghost:hover{border-color:#a9c6ff;color:var(--blue);background:#f5f9ff}
+.addrow{display:flex;gap:10px}
+.addrow .ghost{flex:1}
+.kind{flex:0 0 auto;font-size:10.5px;color:#8a99b5;background:#f2f6fd;border:1px solid #e3ecfa;
+  border-radius:6px;padding:2px 6px;margin-right:2px}
+.ghost.solid{border-style:solid}
+.primary{height:50px;padding:0 26px;border-radius:14px;border:none;color:#fff;font-size:14.5px;font-weight:700;
+  cursor:pointer;background:linear-gradient(135deg,#5b95ff,#2f6bff);
+  box-shadow:0 10px 24px rgba(47,107,255,.3);transition:.18s}
+.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 14px 30px rgba(47,107,255,.36)}
+.primary:active:not(:disabled){transform:translateY(0) scale(.99)}
+.primary:disabled{background:#cfd8e8;box-shadow:none;cursor:not-allowed;opacity:.85}
+.goto{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.totalsize{color:var(--sub);font-size:12.8px}
+.totalsize b{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums}
+
+/* ---------- 传输中 ---------- */
+.tf{max-width:720px;margin:0 auto;text-align:center;padding-top:6px}
+.devrow{display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:18px}
+.devnode{display:flex;flex-direction:column;align-items:center;gap:9px;width:112px}
+.node{width:74px;height:74px;border-radius:24px;display:grid;place-items:center;
+  background:linear-gradient(150deg,#f0f6ff,#dbe7ff);border:1px solid #e2ecff;
+  box-shadow:0 10px 24px rgba(47,107,255,.14)}
+.node.local{background:linear-gradient(150deg,#eafaf1,#d6f0e2);border-color:#d8f0e4;box-shadow:0 10px 24px rgba(22,163,74,.14)}
+.devnode b{font-size:12.5px;font-weight:600}
+.devnode small{font-size:11px;color:var(--sub)}
+.link{position:relative;flex:0 1 180px;height:26px}
+.rail{position:absolute;left:0;right:0;top:50%;border-top:2px dashed #c9d8f6}
+.pkt{position:absolute;top:calc(50% - 3px);left:0;width:6px;height:6px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 8px rgba(47,107,255,.7);animation:flow 1.8s linear infinite}
+.pkt.p2{animation-delay:.6s;opacity:.75}
+.pkt.p3{animation-delay:1.2s;opacity:.5}
+@keyframes flow{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 6px);opacity:0}}
+.ringwrap{position:relative;width:264px;height:264px;margin:6px auto 4px}
+.ringwrap svg{width:100%;height:100%;display:block}
+.rg-track{fill:none;stroke:#e7eefb;stroke-width:13}
+.rg-bar{fill:none;stroke:url(#rgGrad);stroke-width:13;stroke-linecap:round;
+  stroke-dasharray:603.2;stroke-dashoffset:603.2;transform:rotate(-90deg);transform-origin:110px 110px;
+  transition:stroke-dashoffset .4s cubic-bezier(.2,.8,.3,1)}
+.ringcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.pct{font-size:46px;font-weight:800;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,#2f6bff,#7a5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pctsub{font-size:12px;color:var(--sub);letter-spacing:.5px}
+.stats3{display:flex;justify-content:center;gap:0;margin:26px auto 0;max-width:560px}
+.stats3>div{flex:1;padding:0 10px;border-left:1px solid var(--line)}
+.stats3>div:first-child{border-left:none}
+.stats3 b{display:block;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
+.stats3 span{font-size:11.5px;color:var(--sub);display:block;margin-top:3px}
+.fileline{max-width:600px;margin:24px auto 0;font-size:12.3px;color:#8294b0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:center;min-height:18px}
+.tffoot{max-width:600px;margin:18px auto 0;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.filecount{font-size:12.5px;color:var(--sub);font-variant-numeric:tabular-nums}
+.tffoot .ghost{width:auto;margin:0}
+
+/* ---------- 完成 ---------- */
+.done{max-width:680px;margin:0 auto;text-align:center;padding-top:10px}
+.check{width:96px;height:96px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(150deg,#37d67a,#16a34a);box-shadow:0 16px 36px rgba(22,163,74,.3);
+  animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+.done h1{font-size:27px;margin:0 0 8px;letter-spacing:-.3px}
+.done .sub{color:var(--sub);margin:0}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 10px;box-shadow:var(--sh)}
+.stat b{display:block;font-size:21px;font-weight:800;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--sub)}
+.doneMeta{font-size:12.5px;color:var(--sub);margin-top:18px}
+.failbox{display:none;text-align:left;margin-top:20px;background:#fffaf0;border:1px solid #f6e2bd;
+  border-radius:16px;padding:16px 18px;max-height:170px;overflow:auto}
+.failbox b{color:#8a5a00;font-size:12.8px}
+.failbox div{font-size:12px;color:#8a6a2a;margin-top:7px;word-break:break-all}
+.actions{display:flex;gap:12px;justify-content:center;margin-top:28px}
+.actions .ghost{width:auto;margin:0;height:50px;border-style:solid;padding:0 24px}
+
+/* ---------- 错误 ---------- */
+.err{max-width:520px;margin:40px auto;text-align:center}
+.err .ico{width:74px;height:74px;border-radius:50%;background:#fff0f0;display:grid;place-items:center;margin:0 auto 20px}
+.err h1{font-size:21px;margin:0 0 10px}
+.err p{color:var(--sub);font-size:13px;line-height:1.7;margin:0 0 24px}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);background:rgba(20,33,61,.92);
+  color:#fff;font-size:13px;padding:12px 20px;border-radius:13px;opacity:0;pointer-events:none;
+  transition:.25s;box-shadow:0 12px 30px rgba(20,33,61,.25);max-width:80vw;z-index:50}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 8h13l-3.2-3.2"/><path d="M20 16H7l3.2 3.2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">lxfer</div>
+      <div class="brand-sub">换机助手</div>
+    </div>
+  </div>
+  <div class="top-right"><span class="dot"></span><span id="localip">--</span></div>
+</header>
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== 工具 ==================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fmtBytes(n){
+  if(n == null) return '--';
+  n = Number(n);
+  if(n >= 1099511627776) return (n/1099511627776).toFixed(2)+' TB';
+  if(n >= 1073741824) return (n/1073741824).toFixed(n>=10737418240?1:2)+' GB';
+  if(n >= 1048576) return (n/1048576).toFixed(1)+' MB';
+  if(n >= 1024) return (n/1024).toFixed(1)+' KB';
+  return n+' B';
+}
+const num = n => (n == null ? '--' : Number(n).toLocaleString('zh-CN'));
+function fmtSpeed(b){ return b ? (b/1048576).toFixed(1)+' MB/s' : '--'; }
+function fmtDur(sec){
+  if(sec == null || !isFinite(sec) || sec <= 0) return '--';
+  sec = Math.round(sec);
+  if(sec >= 3600) return Math.floor(sec/3600)+' 时 '+Math.floor(sec%3600/60)+' 分';
+  if(sec >= 60) return Math.floor(sec/60)+' 分 '+(sec%60)+' 秒';
+  return sec+' 秒';
+}
+let toastTimer = null;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3800);
+}
+async function api(path, body){
+  try{
+    const r = await fetch(path, body ? {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    } : {});
+    return await r.json();
+  }catch(e){ return {ok:false, error:String(e)}; }
+}
+
+/* ==================== 局部状态 ==================== */
+const LS = { view:'', st:null, ip:'', code:'', lastDevJSON:'', lastSrcJSON:'', lastMsg:'' , codeFocus:0};
+
+/* ==================== 视图切换 ==================== */
+function viewOf(st){
+  if(st.phase === 'transferring') return 'transfer';
+  if(st.phase === 'done') return 'done';
+  if(st.phase === 'error') return 'error';
+  if(st.mode === 'home' || !st.mode) return 'home';
+  return st.mode === 'recv' ? 'recv' : 'send';
+}
+
+/* ==================== 图标 ==================== */
+const ICON_LAPTOP = `<svg width="46" height="46" viewBox="0 0 64 64" fill="none">
+  <rect x="11" y="13" width="42" height="29" rx="3.5" fill="#fff" stroke="#2f6bff" stroke-width="2.6"/>
+  <path d="M6.5 46.5h51l-3.2 5.6a2 2 0 0 1-1.7 1H11.4a2 2 0 0 1-1.7-1L6.5 46.5Z" fill="#2f6bff" opacity=".16"/>
+  <rect x="6.5" y="46.5" width="51" height="2.4" rx="1.2" fill="#2f6bff" opacity=".55"/>
+  <rect x="27" y="19" width="10" height="2" rx="1" fill="#9dbcff"/><rect x="24" y="24" width="16" height="2" rx="1" fill="#c9dbff"/>
+</svg>`;
+const ICON_DOWN = `<svg width="46" height="46" viewBox="0 0 64 64" fill="none">
+  <rect x="11" y="13" width="42" height="29" rx="3.5" fill="#fff" stroke="#16a34a" stroke-width="2.6"/>
+  <path d="M6.5 46.5h51l-3.2 5.6a2 2 0 0 1-1.7 1H11.4a2 2 0 0 1-1.7-1L6.5 46.5Z" fill="#16a34a" opacity=".16"/>
+  <rect x="6.5" y="46.5" width="51" height="2.4" rx="1.2" fill="#16a34a" opacity=".5"/>
+  <path d="M32 19v12m0 0 5-5m-5 5-5-5" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+const ICON_SMALL = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>`;
+
+/* ==================== 各屏 HTML ==================== */
+function htmlHome(){
+  return `<section class="home">
+    <h1>把数据搬到新电脑</h1>
+    <p class="sub">同一个 WiFi 下两台电脑直连传输 · 不经过网络 · 不用开共享、不用建账户</p>
+    <div class="cards">
+      <button class="pick" data-mode="send">
+        <div class="glow"></div>
+        <div class="art">${ICON_LAPTOP}</div>
+        <h2>发送数据</h2>
+        <p>这台电脑里有数据，要传到新电脑</p>
+        <span class="tag">旧电脑</span>
+      </button>
+      <button class="pick" data-mode="recv">
+        <div class="glow"></div>
+        <div class="art">${ICON_DOWN}</div>
+        <h2>接收数据</h2>
+        <p>这台电脑是新电脑，接收并保存到指定位置</p>
+        <span class="tag blue">新电脑</span>
+      </button>
+    </div>
+    <div class="feats">
+      <span><i></i>整盘 / 文件夹</span><span><i></i>断点续传</span>
+      <span><i></i>CRC32 完整性校验</span><span><i></i>自动生成报告</span>
+    </div>
+  </section>`;
+}
+
+function htmlRecv(){
+  return `<div class="thead">
+    <button class="back" id="back">‹</button>
+    <div><h1>接收数据</h1><p>在新电脑上运行，等旧电脑把数据传过来</p></div>
+  </div>
+  <section class="pair">
+    <div class="card">
+      <div class="eyebrow">配对码</div>
+      <div class="digits" id="digits"></div>
+      <div class="status"><span class="pulse"></span><span id="recvstatus">等待旧电脑连接…</span></div>
+      <div class="hint">在旧电脑上选择「发送数据」，找到本机后输入这 6 位数字即可开始。</div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="eyebrow">保存位置</div>
+        <div class="pathrow">
+          <input type="text" id="dest" spellcheck="false" placeholder="例如 F:\\OldPC">
+          <button class="btn-browse" id="browse">浏览…</button>
+        </div>
+        <div class="space" id="space">--</div>
+        <ul class="ticks">
+          <li>自动保留原来的盘符和目录结构</li>
+          <li>中途断了，重连后从断点继续</li>
+          <li>每个文件 CRC32 校验后写入报告</li>
+        </ul>
+      </div>
+      <div class="tip">本机 IP：<b id="ip2">--</b> · 端口 <b id="port2">--</b><br>同一 WiFi 下发送端通常会自动发现本机</div>
+    </div>
+  </section>`;
+}
+
+function htmlSend(){
+  return `<div class="thead">
+    <button class="back" id="back">‹</button>
+    <div><h1>发送数据</h1><p>选择接收设备、输入配对码，再挑选要搬的内容</p></div>
+  </div>
+  <section class="send">
+    <div>
+      <div class="card">
+        <div class="eyebrow">接收设备<button class="mini" id="refresh">重新搜索</button></div>
+        <div class="devices" id="devices"></div>
+        <div class="or">或手动输入 IP</div>
+        <input type="text" id="manualip" spellcheck="false" placeholder="例如 192.168.10.31">
+      </div>
+      <div class="card" style="margin-top:24px">
+        <div class="eyebrow">配对码</div>
+        <div class="codeboxes" id="codeboxes"></div>
+        <div class="hint">接收端屏幕上显示的 6 位数字。</div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="eyebrow">要发送的内容</div>
+        <div class="chips" id="drivechips"></div>
+        <div id="srclist" style="margin-top:6px"></div>
+        <div class="addrow"><button class="ghost" id="addsrc">＋ 文件夹</button><button class="ghost" id="addfiles">＋ 文件</button></div>
+        <div class="goto">
+          <div class="totalsize" id="totalsize"></div>
+          <button class="primary" id="start" disabled>开始传输</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function htmlTransfer(){
+  return `<section class="tf">
+    <div class="devrow">
+      <div class="devnode">
+        <div class="node">${ICON_LAPTOP}</div>
+        <b id="tfpeer">旧电脑</b><small>发送端</small>
+      </div>
+      <div class="link"><div class="rail"></div><div class="pkt"></div><div class="pkt p2"></div><div class="pkt p3"></div></div>
+      <div class="devnode">
+        <div class="node local">${ICON_DOWN}</div>
+        <b>本机</b><small>接收端</small>
+      </div>
+    </div>
+    <div class="ringwrap">
+      <svg viewBox="0 0 220 220">
+        <defs><linearGradient id="rgGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#5b95ff"/><stop offset="100%" stop-color="#7a5cff"/>
+        </linearGradient></defs>
+        <circle class="rg-track" cx="110" cy="110" r="96"/>
+        <circle class="rg-bar" id="bar" cx="110" cy="110" r="96"/>
+      </svg>
+      <div class="ringcenter"><div class="pct" id="pct">0%</div><div class="pctsub">已完成</div></div>
+    </div>
+    <div class="stats3">
+      <div><b id="spd">--</b><span>传输速度</span></div>
+      <div><b id="donemb">--</b><span>已传输 / 总量</span></div>
+      <div><b id="eta">--</b><span>剩余时间</span></div>
+    </div>
+    <div class="fileline" id="curfile">正在准备…</div>
+    <div class="tffoot">
+      <span class="filecount" id="filecount">0 / 0 个文件</span>
+      <button class="ghost solid" id="cancel">取消</button>
+    </div>
+  </section>`;
+}
+
+function htmlDone(){
+  return `<section class="done">
+    <div class="check">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4.5 12.5l5.2 5.2L19.6 6.8"/>
+      </svg>
+    </div>
+    <h1>传输完成</h1>
+    <p class="sub" id="doneSub">所有文件都已校验通过</p>
+    <div class="grid4">
+      <div class="stat"><b id="dCopy">0</b><span>已复制</span></div>
+      <div class="stat"><b id="dSkip">0</b><span>已跳过</span></div>
+      <div class="stat"><b id="dFail">0</b><span>失败</span></div>
+      <div class="stat"><b id="dBytes">--</b><span>传输大小</span></div>
+    </div>
+    <div class="doneMeta" id="doneMeta"></div>
+    <div class="failbox" id="failbox"></div>
+    <div class="actions">
+      <button class="primary" id="openfolder">打开保存文件夹</button>
+      <button class="ghost solid" id="again">再来一次</button>
+    </div>
+  </section>`;
+}
+
+function htmlError(){
+  return `<section class="err">
+    <div class="ico">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#e5484d" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7.5v6"/><circle cx="12" cy="16.6" r="1" fill="#e5484d" stroke="none"/>
+      </svg>
+    </div>
+    <h1 id="errTitle">出了点问题</h1>
+    <p id="errMsg"></p>
+    <button class="primary" id="again">返回重试</button>
+  </section>`;
+}
+
+/* ==================== 渲染 ==================== */
+function render(st){
+  LS.st = st;
+  if(st.ip) $('#localip').textContent = st.ip;
+
+  const view = viewOf(st);
+  if(view !== LS.view){
+    LS.view = view;
+    LS.lastDevJSON = ''; LS.lastSrcJSON = ''; LS.code = '';
+    const wrap = h => { $('#app').innerHTML = '<div class="page">' + h + '</div>'; };
+    if(view === 'home')      { wrap(htmlHome()); bindHome(); }
+    else if(view === 'recv') { wrap(htmlRecv()); bindRecv(); }
+    else if(view === 'send') { wrap(htmlSend()); bindSend(); }
+    else if(view === 'transfer'){ wrap(htmlTransfer()); bindTransfer(); }
+    else if(view === 'done') { wrap(htmlDone()); bindDone(); }
+    else                     { wrap(htmlError()); bindError(); }
+  }
+  update(view, st);
+
+  const msg = st.message || '';
+  if(msg && msg !== LS.lastMsg){ LS.lastMsg = msg; toast(msg); }
+  if(st.error) $('#errMsg') && ($('#errMsg').textContent = st.error);
+}
+
+/* ---------- 首页 ---------- */
+function bindHome(){
+  document.querySelectorAll('.pick').forEach(b => b.onclick = async () => {
+    await api('/api/mode', {mode: b.dataset.mode});
+  });
+}
+function updateHome(){}
+
+/* ---------- 接收 ---------- */
+function bindRecv(){
+  $('#back').onclick = () => api('/api/mode', {mode:'home'});
+  $('#browse').onclick = async () => { await api('/api/pick-folder', {purpose:'dest'}); };
+  const d = $('#dest');
+  d.onchange = () => api('/api/dest', {path: d.value});
+  d.onkeydown = e => { if(e.key === 'Enter'){ d.blur(); api('/api/dest', {path: d.value}); } };
+}
+function updateRecv(st){
+  const digits = (st.code || '------').split('');
+  const el = $('#digits');
+  if(el){
+    if(el.dataset.v !== st.code){
+      el.dataset.v = st.code;
+      el.innerHTML = digits.map((c,i) => {
+        const sep = (i === 3) ? '<div class="dg sep">·</div>' : '';
+        return sep + `<div class="dg">${esc(c)}</div>`;
+      }).join('');
+    }
+  }
+  const s = $('#recvstatus');
+  if(s) s.textContent = st.peer ? ('已连接：' + st.peer) : '等待旧电脑连接…';
+  const d = $('#dest');
+  if(d && document.activeElement !== d && d.dataset.init !== st.dest){ d.value = st.dest || ''; d.dataset.init = st.dest; }
+  const sp = $('#space');
+  if(sp) sp.textContent = st.destFree != null
+      ? ('该磁盘剩余可用空间：' + fmtBytes(st.destFree))
+      : '请选择一个保存位置';
+  if($('#ip2')) $('#ip2').textContent = st.ip || '--';
+  if($('#port2')) $('#port2').textContent = st.port || '--';
+}
+
+/* ---------- 发送 ---------- */
+function bindSend(){
+  $('#back').onclick = () => api('/api/mode', {mode:'home'});
+  $('#refresh').onclick = async () => { toast('正在搜索同一 WiFi 下的设备…'); await api('/api/discover', {}); };
+  $('#addsrc').onclick = async () => { await api('/api/pick-folder', {purpose:'src'}); };
+  const mi = $('#manualip');
+  if(mi){
+    mi.value = LS.ip || '';
+    mi.oninput = () => { LS.ip = mi.value.trim(); LS.port = 0; syncStart(); markSel(); };
+  }
+  const cc = $('#codeboxes');
+  if(cc && !cc.children.length){
+    for(let i=0;i<6;i++){
+      const inp = document.createElement('input');
+      inp.className = 'cb'; inp.maxLength = 1; inp.inputMode = 'numeric'; inp.type='text';
+      inp.oninput = () => {
+        inp.value = (inp.value.match(/\d/) || [''])[0];
+        inp.classList.toggle('filled', !!inp.value);
+        if(inp.value && i < 5) cc.children[i+1].focus();
+        LS.code = [...cc.children].map(x => x.value).join('');
+        syncStart();
+      };
+      inp.onkeydown = e => {
+        if(e.key === 'Backspace' && !inp.value && i > 0){ cc.children[i-1].focus(); e.preventDefault(); }
+        if(e.key === 'Enter'){ syncStart(); }
+      };
+      inp.onpaste = e => {
+        const t = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,6);
+        if(!t) return;
+        e.preventDefault();
+        [...cc.children].forEach((x,k) => { x.value = t[k] || ''; x.classList.toggle('filled', !!x.value); });
+        LS.code = t; syncStart();
+      };
+      cc.appendChild(inp);
+    }
+  }
+  $('#start').onclick = async () => {
+    const r = await api('/api/send/start', {ip: LS.ip, code: LS.code, port: LS.port || 0});
+    if(!r.ok) toast(r.error || '无法开始传输');
+  };
+}
+function markSel(){
+  document.querySelectorAll('.dev').forEach(d => d.classList.toggle('sel', d.dataset.ip === LS.ip));
+  const mi = $('#manualip');
+  if(mi && document.activeElement !== mi && LS.ip) mi.value = LS.ip;
+}
+function syncStart(){
+  const st = LS.st;
+  const btn = $('#start');
+  if(!btn) return;
+  const ok = (LS.ip && LS.ip.length >= 7) && (LS.code && LS.code.length === 6) && st && st.srcs && st.srcs.length > 0;
+  btn.disabled = !ok;
+}
+function updateSend(st){
+  // 设备列表
+  const dv = st.devices || [];
+  const key = JSON.stringify(dv);
+  if(key !== LS.lastDevJSON){
+    LS.lastDevJSON = key;
+    const el = $('#devices');
+    if(el){
+      if(!dv.length){
+        el.innerHTML = `<div class="searching"><div class="spin"></div>正在查找同一 WiFi 下的设备…</div>`;
+      }else{
+        el.innerHTML = dv.map(d => `
+          <button class="dev ${d.ip === LS.ip ? 'sel' : ''}" data-ip="${esc(d.ip)}" data-port="${d.port}">
+            <span class="devic">${ICON_SMALL}</span>
+            <span><b>${esc(d.name)}</b><small>${esc(d.ip)} · 可接收</small></span>
+            <span class="chev">›</span>
+          </button>`).join('');
+        el.querySelectorAll('.dev').forEach(b => b.onclick = () => { LS.ip = b.dataset.ip; LS.port = Number(b.dataset.port) || 0; markSel(); syncStart(); });
+      }
+    }
+  }
+  // 磁盘快捷选择
+  const drives = st.drives || [];
+  const dk = JSON.stringify(drives.map(d => d.letter + ':' + d.free));
+  const chips = $('#drivechips');
+  if(chips && chips.dataset.k !== dk){
+    chips.dataset.k = dk;
+    chips.innerHTML = drives.map(d =>
+      `<button class="chip" data-path="${esc(d.letter)}:\\">${esc(d.letter)}: 盘 · ${fmtBytes(d.used)}</button>`).join('');
+    chips.querySelectorAll('.chip').forEach(b => b.onclick = async () => {
+      const r = await api('/api/add-src', {path: b.dataset.path});
+      if(!r.ok) toast(r.error || '添加失败');
+    });
+  }
+  // 已选内容
+  const srcs = st.srcs || [];
+  const sk = JSON.stringify(srcs);
+  if(sk !== LS.lastSrcJSON){
+    LS.lastSrcJSON = sk;
+    const el = $('#srclist');
+    if(el){
+      if(!srcs.length){
+        el.innerHTML = `<div class="empty">还没有选择内容，点上面整盘按钮或添加文件夹</div>`;
+      }else{
+        el.innerHTML = srcs.map(s => `
+          <div class="srcrow">
+            <span class="kind">${s.file ? '文件' : '文件夹'}</span>
+            <span class="nm" title="${esc(s.path)}">${esc(s.path)}</span>
+            <span class="sz">${s.scanning ? '统计中…' : fmtBytes(s.size)}</span>
+            <button class="del" data-path="${esc(s.path)}">×</button>
+          </div>`).join('');
+        el.querySelectorAll('.del').forEach(b => b.onclick = () => api('/api/remove-src', {path: b.dataset.path}));
+      }
+    }
+    const ts = $('#totalsize');
+    if(ts){
+      const done = srcs.filter(s => !s.scanning);
+      const total = done.reduce((a,s) => a + (s.size || 0), 0);
+      ts.innerHTML = srcs.length
+        ? `共 <b>${fmtBytes(total)}</b>${srcs.some(s=>s.scanning) ? ' <span style="color:#a7b4cb">(统计中…)</span>' : ''}`
+        : '请先选择要发送的内容';
+    }
+    syncStart();
+  }
+  if(!LS.ip && st.destNone) { /* noop */ }
+  syncStart();
+}
+
+/* ---------- 传输 ---------- */
+function bindTransfer(){
+  $('#cancel').onclick = async () => { await api('/api/cancel', {}); toast('已取消，再次开始会从断点继续'); };
+}
+const CIRC = 603.2;
+function updateTransfer(st){
+  const p = st.prog || {};
+  const pct = p.bytesTotal > 0 ? Math.min(100, p.bytesDone / p.bytesTotal * 100) : 0;
+  const bar = $('#bar');
+  if(bar) bar.style.strokeDashoffset = String(CIRC - CIRC * pct / 100);
+  if($('#pct')) $('#pct').textContent = pct.toFixed(pct >= 100 ? 0 : 1) + '%';
+  if($('#spd')) $('#spd').textContent = fmtSpeed(p.speed);
+  if($('#donemb')) $('#donemb').textContent = fmtBytes(p.bytesDone) + ' / ' + fmtBytes(p.bytesTotal);
+  if($('#eta')) $('#eta').textContent = fmtDur(p.eta);
+  if($('#curfile')) $('#curfile').textContent = p.current || '正在准备…';
+  if($('#filecount')) $('#filecount').textContent = (p.filesDone||0) + ' / ' + (p.filesTotal||0) + ' 个文件' + (p.workers > 1 ? ' · ' + p.workers + ' 路并行' : '') + (st.secure ? ' · 🔒 加密' : '');
+  if($('#tfpeer')) $('#tfpeer').textContent = st.peer || '旧电脑';
+}
+
+/* ---------- 完成 ---------- */
+function bindDone(){
+  $('#again').onclick = () => api('/api/mode', {mode:'home'});
+  $('#openfolder').onclick = () => {
+    const d = (LS.st && LS.st.result && LS.st.result.dest) || (LS.st && LS.st.dest) || '';
+    api('/api/open-folder', {path: d});
+  };
+}
+function updateDone(st){
+  const bo = $('#openfolder'); if(bo) bo.style.display = (st.mode === 'recv') ? '' : 'none';
+  const r = st.result || {};
+  if($('#dCopy')) $('#dCopy').textContent = num(r.copied);
+  if($('#dSkip')) $('#dSkip').textContent = num(r.skipped);
+  if($('#dFail')) $('#dFail').textContent = num(r.failed);
+  if($('#dBytes')) $('#dBytes').textContent = fmtBytes(r.bytes || 0);
+  const nothing = (r.copied === 0 && (r.skipped || 0) > 0);
+  if($('#doneSub')) $('#doneSub').textContent = (r.failed > 0)
+      ? '大部分文件已传输，下面这些需要重试'
+      : (nothing ? '全部文件已存在于目标位置，无需重新传输' : '所有文件都已通过 CRC32 校验');
+  if($('#doneMeta')){
+    const parts = [];
+    if(nothing) parts.push(`已跳过 ${num(r.skipped)} 个文件`);
+    else parts.push(`耗时 ${fmtDur(r.elapsed)}`, `平均 ${fmtSpeed(r.avgSpeed)}`);
+    if(r.report) parts.push(`报告 ${r.report}`);
+    $('#doneMeta').textContent = parts.join(' · ');
+  }
+  const fb = $('#failbox');
+  if(fb){
+    const list = r.failedList || [];
+    if(list.length){
+      fb.style.display = 'block';
+      fb.innerHTML = `<b>失败 ${list.length} 项（重跑会自动重试）</b>` +
+        list.slice(0, 40).map(x => `<div>✗ ${esc(x[0])} — ${esc(x[1])}</div>`).join('');
+    }else{ fb.style.display = 'none'; }
+  }
+}
+
+/* ---------- 错误 ---------- */
+function bindError(){ $('#again').onclick = () => api('/api/mode', {mode:'home'}); }
+function updateError(st){ if($('#errMsg')) $('#errMsg').textContent = st.error || '未知错误'; }
+
+/* ---------- 分发 ---------- */
+function update(view, st){
+  if(view === 'recv') updateRecv(st);
+  else if(view === 'send') updateSend(st);
+  else if(view === 'transfer') updateTransfer(st);
+  else if(view === 'done') updateDone(st);
+  else if(view === 'error') updateError(st);
+}
+
+/* ==================== 轮询 ==================== */
+async function poll(){
+  const st = await api('/api/state');
+  if(st && st.ok !== false) render(st);
+}
+poll();
+setInterval(poll, 400);
+</script>
+</body>
+</html>
