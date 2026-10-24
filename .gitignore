@@ -1,4 +1,4 @@
-﻿# 构建产物
+# 构建产物
 *.exe
 *.pdb
 *.o
@@ -18,3 +18,7 @@ _*/
 .idea/
 .vscode/
 *.iml
+
+mobile/build_tool/
+mobile/test_driver/
+*.log

@@ -2552,6 +2552,30 @@ fn handle_http(mut stream: TcpStream, state: Arc<AppState>) {
     let _ = write_response(&mut stream, "application/json; charset=utf-8", resp.as_bytes());
 }
 
+fn get_num(body: &str, key: &str) -> u64 {
+    if let Some(i) = body.find(&format!("\"{}\"", key)) {
+        let rest = &body[i + key.len() + 2..];
+        if let Some(c) = rest.find(':') {
+            let r2 = rest[c + 1..].trim_start();
+            let mut val = 0u64;
+            let mut any = false;
+            for ch in r2.chars() {
+                if let Some(d) = ch.to_digit(10) {
+                    val = val.saturating_mul(10).saturating_add(d as u64);
+                    any = true;
+                } else if any {
+                    break;
+                } else if ch == '"' {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            return if any { val } else { 0 };
+        }
+    }
+    0
+}
 fn get_str(body: &str, key: &str) -> String {
     // 极简 JSON 取字符串字段（只服务自家前端）
     if let Some(i) = body.find(&format!("\"{}\"", key)) {
@@ -2788,7 +2812,7 @@ fn handle_action(state: &Arc<AppState>, path: &str, body: &str) -> bool {
                 return false;
             }
             state.cancel.store(false, Ordering::SeqCst);
-            let port_req: u16 = get_str(body, "port").parse().unwrap_or(0);
+            let port_req: u16 = get_num(body, "port") as u16;
             let port = if port_req > 0 {
                 port_req
             } else {
