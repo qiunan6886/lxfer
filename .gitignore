@@ -22,3 +22,5 @@ _*/
 mobile/build_tool/
 mobile/test_driver/
 *.log
+
+dist/

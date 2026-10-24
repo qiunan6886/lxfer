@@ -162,10 +162,22 @@ HELLO2 <code> <name> <jobid> <widx> <count> <pubkey> <totalbytes> <done_mask>
 
 同一套协议、同一套加密的手机客户端，Flutter 实现，可以和电脑互传。
 
-### 1. 安装
+### 1. 安装（两种方式）
 
-- 电脑上运行仓库里的 `dist/lxfer-1.0.0.apk` 所在目录的简易服务器，手机浏览器打开下载即可（见交付说明）
-- 或数据线连电脑后：`adb install -r lxfer-1.0.0.apk`
+**方式 A：手机浏览器直接下（同一 WiFi，最快）**
+
+在手机上打开：`http://192.168.10.31:8099/` （电脑上跑着仓库里的 `mobile/tool/serve_apk.dart` 简易服务器时）
+或直接下载：`http://192.168.10.31:8099/lxfer-1.0.0.apk`
+
+**方式 B：GitHub Release（随时可下）**
+
+https://github.com/qiunan6886/lxfer/releases/download/v1.0.0/lxfer-1.0.0.apk
+
+**方式 C：数据线 + adb**
+
+```bash
+adb install -r lxfer-1.0.0.apk
+```
 
 首次安装会提示"未知来源"，允许即可（APK 用 debug 密钥签名，仅供自用）。
 
